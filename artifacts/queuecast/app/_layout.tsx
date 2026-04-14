@@ -1,8 +1,8 @@
 import {
   Inter_400Regular,
-  Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
+  Inter_500Medium,
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,16 +14,26 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PlayerProvider } from "@/context/PlayerContext";
+import { QueuesProvider } from "@/context/QueuesContext";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+    <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="player"
+        options={{
+          presentation: "modal",
+          headerShown: false,
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen name="+not-found" />
     </Stack>
   );
 }
@@ -48,9 +58,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
-              <RootLayoutNav />
+              <QueuesProvider>
+                <PlayerProvider>
+                  <RootLayoutNav />
+                </PlayerProvider>
+              </QueuesProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>

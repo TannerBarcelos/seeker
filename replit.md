@@ -2,7 +2,32 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+pnpm workspace monorepo using TypeScript. Contains **Seeker** — a podcast app with multi-queue listening.
+
+## Apps
+
+- `artifacts/queuecast` — **Seeker** mobile app (Expo / React Native)
+- `artifacts/api-server` — Express API server
+- `artifacts/mockup-sandbox` — Vite design sandbox
+
+## Seeker App Architecture
+
+**Key concept:** Multi-queue — users create named queues (e.g. "Tech", "True Crime") and add episodes to each independently, so different podcast categories never interfere with each other.
+
+### State Management
+- `context/QueuesContext.tsx` — queue CRUD + AsyncStorage persistence
+- `context/PlayerContext.tsx` — mock playback state (progress timer)
+
+### Screens
+- `app/(tabs)/index.tsx` — Discover (featured shows + trending episodes)
+- `app/(tabs)/queues.tsx` — Queues manager (create, rename, delete, expand)
+- `app/(tabs)/library.tsx` — Library (subscribed shows + stats)
+- `app/(tabs)/search.tsx` — Search (shows + episodes full-text)
+- `app/player.tsx` — Full-screen player modal
+
+### Data
+- `constants/mockData.ts` — 8 podcasts, 16 episodes, typed interfaces
+- `constants/colors.ts` — Deep navy dark theme (#0D1117 bg, #58A6FF primary)
 
 ## Stack
 
