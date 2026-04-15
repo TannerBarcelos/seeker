@@ -1,0 +1,42 @@
+[[ports]]
+localPort = 5173
+externalPort = 5173
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 23859
+externalPort = 3000
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/queuecast: expo"
+
+[[workflows.workflow]]
+name = "artifacts/queuecast: expo"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd artifacts/queuecast && PATH=/nix/store/bl6iwirn83qj9r8wng43kfdqd5mfahj8-nodejs-22.22.0/bin:$PATH node_modules/.bin/expo start --web --port 8081"
+waitForPort = 8081

@@ -1,0 +1,47 @@
+{
+  "name": "@workspace/queuecast",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start --web --port 8081",
+    "build": "expo export --platform web",
+    "serve": "serve dist --listen 8081"
+  },
+  "dependencies": {
+    "@expo-google-fonts/inter": "*",
+    "@expo/vector-icons": "*",
+    "@react-native-async-storage/async-storage": "*",
+    "@tanstack/react-query": "*",
+    "expo": "~54.0.33",
+    "expo-blur": "*",
+    "expo-constants": "*",
+    "expo-font": "*",
+    "expo-glass-effect": "*",
+    "expo-haptics": "*",
+    "expo-image": "*",
+    "expo-image-picker": "*",
+    "expo-linear-gradient": "*",
+    "expo-linking": "*",
+    "expo-location": "*",
+    "expo-router": "*",
+    "expo-splash-screen": "*",
+    "expo-status-bar": "*",
+    "expo-symbols": "*",
+    "expo-system-ui": "*",
+    "expo-web-browser": "*",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "*",
+    "react-native-keyboard-controller": "*",
+    "react-native-reanimated": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
+    "react-native-svg": "*",
+    "react-native-web": "*",
+    "react-native-worklets": "*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}
