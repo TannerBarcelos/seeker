@@ -1,0 +1,8 @@
+version = 1
+kind = "mobile"
+title = "Seeker"
+
+[services.expo]
+command = "cd artifacts/queuecast && PATH=/nix/store/bl6iwirn83qj9r8wng43kfdqd5mfahj8-nodejs-22.22.0/bin:$PATH node_modules/.bin/expo start --web --port 8081"
+path = "/"
+waitForPort = 8081

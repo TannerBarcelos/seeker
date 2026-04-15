@@ -1,5 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
 import {
   Alert,
@@ -19,6 +20,8 @@ import { useQueues } from "@/context/QueuesContext";
 import { usePlayer } from "@/context/PlayerContext";
 import { AddToQueueSheet } from "@/components/AddToQueueSheet";
 import { EpisodeRow } from "@/components/EpisodeRow";
+
+const isIOS = Platform.OS === "ios";
 
 export default function QueuesScreen() {
   const colors = useColors();
@@ -95,9 +98,27 @@ export default function QueuesScreen() {
         <Text style={[styles.title, { color: colors.foreground }]}>My Queues</Text>
         <Pressable
           onPress={() => setCreating(!creating)}
-          style={[styles.addBtn, { backgroundColor: creating ? colors.secondary : colors.primary }]}
+          style={({ pressed }) => [
+            styles.addBtn,
+            {
+              backgroundColor: creating
+                ? colors.glassBold
+                : colors.primary,
+              opacity: pressed ? 0.75 : 1,
+            },
+          ]}
         >
-          <Ionicons name={creating ? "close" : "add"} size={20} color={creating ? colors.foreground : colors.primaryForeground} />
+          {creating ? (
+            isIOS ? (
+              <SymbolView name="xmark" size={17} tintColor={colors.foreground} />
+            ) : (
+              <Ionicons name="close" size={20} color={colors.foreground} />
+            )
+          ) : isIOS ? (
+            <SymbolView name="plus" size={17} tintColor="#fff" />
+          ) : (
+            <Ionicons name="add" size={20} color="#fff" />
+          )}
         </Pressable>
       </View>
 
@@ -106,14 +127,26 @@ export default function QueuesScreen() {
       </Text>
 
       {creating && (
-        <View style={[styles.createCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.createCard,
+            { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+          ]}
+        >
           <Text style={[styles.createLabel, { color: colors.foreground }]}>New Queue</Text>
           <TextInput
             value={newName}
             onChangeText={setNewName}
             placeholder="Queue name..."
             placeholderTextColor={colors.mutedForeground}
-            style={[styles.input, { color: colors.foreground, backgroundColor: colors.secondary, borderColor: colors.border }]}
+            style={[
+              styles.input,
+              {
+                color: colors.foreground,
+                backgroundColor: colors.glassBold,
+                borderColor: colors.glassBorder,
+              },
+            ]}
             autoFocus
             returnKeyType="done"
             onSubmitEditing={handleCreateQueue}
@@ -123,13 +156,20 @@ export default function QueuesScreen() {
               <Pressable
                 key={c}
                 onPress={() => setSelectedColor(c)}
-                style={[styles.colorSwatch, { backgroundColor: c }, selectedColor === c && styles.colorSelected]}
+                style={[
+                  styles.colorSwatch,
+                  { backgroundColor: c },
+                  selectedColor === c && styles.colorSelected,
+                ]}
               />
             ))}
           </View>
           <Pressable
             onPress={handleCreateQueue}
-            style={[styles.createBtn, { backgroundColor: selectedColor }]}
+            style={({ pressed }) => [
+              styles.createBtn,
+              { backgroundColor: selectedColor, opacity: pressed ? 0.8 : 1 },
+            ]}
           >
             <Text style={styles.createBtnText}>Create Queue</Text>
           </Pressable>
@@ -143,7 +183,16 @@ export default function QueuesScreen() {
         const isPlayingHere = currentQueueId === queue.id;
 
         return (
-          <View key={queue.id} style={[styles.queueCard, { backgroundColor: colors.card, borderColor: isActive ? queue.color : colors.border }]}>
+          <View
+            key={queue.id}
+            style={[
+              styles.queueCard,
+              {
+                backgroundColor: colors.glass,
+                borderColor: isActive ? queue.color + "55" : colors.glassBorder,
+              },
+            ]}
+          >
             <Pressable
               onPress={() => setExpandedId(isExpanded ? null : queue.id)}
               style={styles.queueHeader}
@@ -155,7 +204,10 @@ export default function QueuesScreen() {
                   <TextInput
                     value={editName}
                     onChangeText={setEditName}
-                    style={[styles.renameInput, { color: colors.foreground, borderColor: queue.color }]}
+                    style={[
+                      styles.renameInput,
+                      { color: colors.foreground, borderColor: queue.color },
+                    ]}
                     autoFocus
                     returnKeyType="done"
                     onSubmitEditing={handleSaveRename}
@@ -171,7 +223,7 @@ export default function QueuesScreen() {
 
               <View style={styles.queueActions}>
                 {isActive ? (
-                  <View style={[styles.activeBadge, { backgroundColor: queue.color + "30" }]}>
+                  <View style={[styles.activeBadge, { backgroundColor: queue.color + "28", borderColor: queue.color + "50" }]}>
                     <Text style={[styles.activeBadgeText, { color: queue.color }]}>Active</Text>
                   </View>
                 ) : (
@@ -180,36 +232,67 @@ export default function QueuesScreen() {
                       setActiveQueueId(queue.id);
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
                     }}
-                    style={[styles.setActiveBtn, { borderColor: queue.color }]}
+                    style={[styles.setActiveBtn, { borderColor: queue.color + "80" }]}
                   >
                     <Text style={[styles.setActiveBtnText, { color: queue.color }]}>Set Active</Text>
                   </Pressable>
                 )}
 
                 <Pressable
-                  onPress={() => episodes.length > 0 && handlePlayFromQueue(queue.id, queue.currentIndex)}
-                  style={[styles.playQueueBtn, { backgroundColor: episodes.length > 0 ? queue.color : colors.secondary }]}
+                  onPress={() =>
+                    episodes.length > 0 && handlePlayFromQueue(queue.id, queue.currentIndex)
+                  }
+                  style={[
+                    styles.playQueueBtn,
+                    {
+                      backgroundColor: episodes.length > 0 ? queue.color : colors.glassBold,
+                    },
+                  ]}
                 >
-                  <Ionicons name="play" size={14} color={episodes.length > 0 ? "#fff" : colors.mutedForeground} />
+                  {isIOS ? (
+                    <SymbolView
+                      name="play.fill"
+                      size={13}
+                      tintColor={episodes.length > 0 ? "#fff" : colors.mutedForeground}
+                    />
+                  ) : (
+                    <Ionicons
+                      name="play"
+                      size={14}
+                      color={episodes.length > 0 ? "#fff" : colors.mutedForeground}
+                    />
+                  )}
                 </Pressable>
 
                 <Pressable onPress={() => setExpandedId(isExpanded ? null : queue.id)}>
-                  <Ionicons
-                    name={isExpanded ? "chevron-up" : "chevron-down"}
-                    size={18}
-                    color={colors.mutedForeground}
-                  />
+                  {isIOS ? (
+                    <SymbolView
+                      name={isExpanded ? "chevron.up" : "chevron.down"}
+                      size={16}
+                      tintColor={colors.mutedForeground}
+                    />
+                  ) : (
+                    <Ionicons
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={18}
+                      color={colors.mutedForeground}
+                    />
+                  )}
                 </Pressable>
               </View>
             </Pressable>
 
             {isExpanded && (
               <View style={styles.episodeList}>
-                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                <View style={[styles.divider, { backgroundColor: colors.glassBorder }]} />
 
                 {episodes.length === 0 ? (
                   <View style={styles.emptyState}>
-                    <Ionicons name="list" size={32} color={colors.mutedForeground} />
+                    {isIOS ? (
+                      <SymbolView name="list.bullet" size={30} tintColor={colors.mutedForeground} />
+                    ) : (
+                      <Ionicons name="list" size={32} color={colors.mutedForeground} />
+                    )}
                     <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
                       No episodes yet. Long-press any episode to add it here.
                     </Text>
@@ -230,19 +313,43 @@ export default function QueuesScreen() {
                         hitSlop={8}
                         style={styles.removeBtn}
                       >
-                        <Ionicons name="close-circle" size={18} color={colors.mutedForeground} />
+                        {isIOS ? (
+                          <SymbolView name="xmark.circle.fill" size={18} tintColor={colors.mutedForeground} />
+                        ) : (
+                          <Ionicons name="close-circle" size={18} color={colors.mutedForeground} />
+                        )}
                       </Pressable>
                     </View>
                   ))
                 )}
 
                 <View style={styles.queueFooter}>
-                  <Pressable onPress={() => handleEditQueue(queue.id, queue.name)} style={styles.footerBtn}>
-                    <Ionicons name="pencil" size={14} color={colors.mutedForeground} />
+                  <Pressable
+                    onPress={() => handleEditQueue(queue.id, queue.name)}
+                    style={({ pressed }) => [
+                      styles.footerBtn,
+                      { backgroundColor: pressed ? colors.glass : "transparent", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 },
+                    ]}
+                  >
+                    {isIOS ? (
+                      <SymbolView name="pencil" size={13} tintColor={colors.mutedForeground} />
+                    ) : (
+                      <Ionicons name="pencil" size={14} color={colors.mutedForeground} />
+                    )}
                     <Text style={[styles.footerBtnText, { color: colors.mutedForeground }]}>Rename</Text>
                   </Pressable>
-                  <Pressable onPress={() => handleDeleteQueue(queue.id, queue.name)} style={styles.footerBtn}>
-                    <Ionicons name="trash-outline" size={14} color={colors.destructive} />
+                  <Pressable
+                    onPress={() => handleDeleteQueue(queue.id, queue.name)}
+                    style={({ pressed }) => [
+                      styles.footerBtn,
+                      { backgroundColor: pressed ? colors.glass : "transparent", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 },
+                    ]}
+                  >
+                    {isIOS ? (
+                      <SymbolView name="trash" size={13} tintColor={colors.destructive} />
+                    ) : (
+                      <Ionicons name="trash-outline" size={14} color={colors.destructive} />
+                    )}
                     <Text style={[styles.footerBtnText, { color: colors.destructive }]}>Delete</Text>
                   </Pressable>
                 </View>
@@ -268,10 +375,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  title: { fontSize: 32, fontWeight: "800", letterSpacing: -1 },
-  subtitle: { fontSize: 13, lineHeight: 18, marginBottom: 8, marginTop: -8 },
+  title: { fontSize: 34, fontWeight: "800", letterSpacing: -1.5 },
+  subtitle: { fontSize: 13, lineHeight: 18, marginBottom: 4, marginTop: -8 },
   addBtn: {
     width: 38,
     height: 38,
@@ -280,7 +387,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   createCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 16,
     gap: 12,
@@ -288,8 +395,8 @@ const styles = StyleSheet.create({
   createLabel: { fontSize: 15, fontWeight: "700" },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
+    borderRadius: 12,
+    padding: 13,
     fontSize: 15,
   },
   colorRow: { flexDirection: "row", gap: 10, flexWrap: "wrap" },
@@ -297,12 +404,12 @@ const styles = StyleSheet.create({
   colorSelected: { borderWidth: 3, borderColor: "#ffffff" },
   createBtn: {
     padding: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
   },
   createBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   queueCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     overflow: "hidden",
   },
@@ -318,19 +425,21 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   queueMeta: { flex: 1, gap: 2 },
-  queueName: { fontSize: 17, fontWeight: "700" },
+  queueName: { fontSize: 17, fontWeight: "700", letterSpacing: -0.3 },
   queueCount: { fontSize: 12 },
   renameInput: {
     fontSize: 17,
     fontWeight: "700",
     borderBottomWidth: 2,
     paddingVertical: 2,
+    color: "#fff",
   },
   queueActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   activeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
   },
   activeBadgeText: { fontSize: 11, fontWeight: "700" },
   setActiveBtn: {
@@ -346,9 +455,9 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 2,
+    paddingLeft: 1,
   },
-  divider: { height: 1, marginHorizontal: 14, marginBottom: 10 },
+  divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 14, marginBottom: 10 },
   episodeList: { paddingHorizontal: 14, paddingBottom: 14 },
   episodeWrapper: { position: "relative" },
   removeBtn: {
@@ -370,12 +479,12 @@ const styles = StyleSheet.create({
   },
   queueFooter: {
     flexDirection: "row",
-    gap: 16,
+    gap: 4,
     marginTop: 8,
     paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.06)",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(255,255,255,0.08)",
   },
-  footerBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
+  footerBtn: { flexDirection: "row", alignItems: "center", gap: 5 },
   footerBtnText: { fontSize: 13 },
 });

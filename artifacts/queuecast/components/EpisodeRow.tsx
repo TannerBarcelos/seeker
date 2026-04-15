@@ -1,12 +1,15 @@
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { formatDuration } from "@/constants/mockData";
 import type { Episode } from "@/constants/mockData";
 import { useColors } from "@/hooks/useColors";
 import { usePlayer } from "@/context/PlayerContext";
 import { PodcastArtwork } from "./PodcastArtwork";
+
+const isIOS = Platform.OS === "ios";
 
 interface Props {
   episode: Episode;
@@ -32,6 +35,7 @@ export function EpisodeRow({
 
   const isCurrent = currentEpisode?.id === episode.id;
   const isCurrentlyPlaying = isCurrent && isPlaying;
+  const accentColor = queueColor ?? colors.primary;
 
   function handlePress() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -50,9 +54,12 @@ export function EpisodeRow({
       style={({ pressed }) => [
         styles.container,
         {
-          backgroundColor: isActive ? colors.secondary : colors.card,
-          borderColor: isCurrent ? (queueColor ?? colors.primary) : colors.border,
-          opacity: pressed ? 0.75 : 1,
+          backgroundColor: pressed
+            ? colors.glassBold
+            : isCurrent
+            ? colors.glassBold
+            : colors.glass,
+          borderColor: isCurrent ? accentColor + "60" : colors.glassBorder,
         },
       ]}
     >
@@ -60,11 +67,14 @@ export function EpisodeRow({
         <Text style={[styles.index, { color: colors.mutedForeground }]}>{index + 1}</Text>
       )}
 
-      <PodcastArtwork colors={episode.artworkColors} size={50} borderRadius={8} />
+      <PodcastArtwork colors={episode.artworkColors} size={50} borderRadius={10} />
 
       <View style={styles.info}>
         <Text
-          style={[styles.title, { color: isCurrent ? (queueColor ?? colors.primary) : colors.foreground }]}
+          style={[
+            styles.title,
+            { color: isCurrent ? accentColor : colors.foreground },
+          ]}
           numberOfLines={2}
         >
           {episode.title}
@@ -84,14 +94,24 @@ export function EpisodeRow({
           hitSlop={8}
           style={[
             styles.playBtn,
-            { backgroundColor: isCurrent ? (queueColor ?? colors.primary) : colors.secondary },
+            {
+              backgroundColor: isCurrent ? accentColor : colors.glassBold,
+            },
           ]}
         >
-          <Ionicons
-            name={isCurrentlyPlaying ? "pause" : "play"}
-            size={16}
-            color={isCurrent ? colors.primaryForeground : colors.foreground}
-          />
+          {isIOS ? (
+            <SymbolView
+              name={isCurrentlyPlaying ? "pause.fill" : "play.fill"}
+              size={15}
+              tintColor={isCurrent ? "#fff" : colors.foreground}
+            />
+          ) : (
+            <Ionicons
+              name={isCurrentlyPlaying ? "pause" : "play"}
+              size={15}
+              color={isCurrent ? "#fff" : colors.foreground}
+            />
+          )}
         </Pressable>
       </View>
     </Pressable>
@@ -104,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     marginBottom: 8,
   },
@@ -122,6 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     lineHeight: 19,
+    letterSpacing: -0.2,
   },
   meta: {
     fontSize: 12,
@@ -145,6 +166,6 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 2,
+    paddingLeft: 1,
   },
 });

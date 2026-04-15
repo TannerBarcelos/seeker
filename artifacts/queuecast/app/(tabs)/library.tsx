@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { SymbolView } from "expo-symbols";
 import React from "react";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,6 +8,7 @@ import { useColors } from "@/hooks/useColors";
 import { useQueues } from "@/context/QueuesContext";
 import { PodcastArtwork } from "@/components/PodcastArtwork";
 
+const isIOS = Platform.OS === "ios";
 const SUBSCRIBED = ["pod-huberman", "pod-lex", "pod-serial", "pod-daily"];
 
 export default function LibraryScreen() {
@@ -20,6 +22,12 @@ export default function LibraryScreen() {
   const allQueuedEpisodeIds = new Set(queues.flatMap((q) => q.episodeIds));
   const queuedCount = allQueuedEpisodeIds.size;
 
+  const stats = [
+    { value: queues.length, label: "Queues", symbol: "list.bullet", icon: "list" as const },
+    { value: queuedCount, label: "Queued", symbol: "bookmark.fill", icon: "bookmark" as const },
+    { value: SUBSCRIBED.length, label: "Shows", symbol: "radio", icon: "radio" as const },
+  ];
+
   return (
     <ScrollView
       style={[styles.root, { backgroundColor: colors.background }]}
@@ -32,18 +40,20 @@ export default function LibraryScreen() {
       <Text style={[styles.title, { color: colors.foreground }]}>Library</Text>
 
       <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.statNum, { color: colors.primary }]}>{queues.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>Queues</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.statNum, { color: colors.primary }]}>{queuedCount}</Text>
-          <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>Queued</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.statNum, { color: colors.primary }]}>{SUBSCRIBED.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>Shows</Text>
-        </View>
+        {stats.map((s) => (
+          <View
+            key={s.label}
+            style={[styles.statCard, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
+          >
+            {isIOS ? (
+              <SymbolView name={s.symbol as any} size={20} tintColor={colors.primary} />
+            ) : (
+              <Ionicons name={s.icon} size={20} color={colors.primary} />
+            )}
+            <Text style={[styles.statNum, { color: colors.foreground }]}>{s.value}</Text>
+            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{s.label}</Text>
+          </View>
+        ))}
       </View>
 
       <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>SUBSCRIBED SHOWS</Text>
@@ -55,9 +65,9 @@ export default function LibraryScreen() {
         return (
           <View
             key={id}
-            style={[styles.showRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.showRow, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
           >
-            <PodcastArtwork colors={podcast.artworkColors} size={56} borderRadius={10} />
+            <PodcastArtwork colors={podcast.artworkColors} size={56} borderRadius={12} />
             <View style={styles.showInfo}>
               <Text style={[styles.showTitle, { color: colors.foreground }]}>{podcast.title}</Text>
               <Text style={[styles.showAuthor, { color: colors.mutedForeground }]}>{podcast.author}</Text>
@@ -65,7 +75,11 @@ export default function LibraryScreen() {
                 {episodes.length} episodes
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
+            {isIOS ? (
+              <SymbolView name="chevron.right" size={15} tintColor={colors.mutedForeground} />
+            ) : (
+              <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
+            )}
           </View>
         );
       })}
@@ -75,7 +89,7 @@ export default function LibraryScreen() {
       {queues.map((q) => (
         <View
           key={q.id}
-          style={[styles.queueRow, { backgroundColor: colors.card, borderColor: colors.border, borderLeftColor: q.color, borderLeftWidth: 3 }]}
+          style={[styles.queueRow, { backgroundColor: colors.glass, borderColor: colors.glassBorder, borderLeftColor: q.color, borderLeftWidth: 3 }]}
         >
           <View style={[styles.queueDot, { backgroundColor: q.color }]} />
           <View style={styles.queueInfo}>
@@ -84,7 +98,11 @@ export default function LibraryScreen() {
               {q.episodeIds.length} episodes
             </Text>
           </View>
-          <Ionicons name="list" size={18} color={q.color} />
+          {isIOS ? (
+            <SymbolView name="list.bullet" size={16} tintColor={q.color} />
+          ) : (
+            <Ionicons name="list" size={18} color={q.color} />
+          )}
         </View>
       ))}
     </ScrollView>
@@ -94,34 +112,34 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { paddingHorizontal: 16, gap: 12 },
-  title: { fontSize: 32, fontWeight: "800", letterSpacing: -1, marginBottom: 4 },
+  title: { fontSize: 34, fontWeight: "800", letterSpacing: -1.5, marginBottom: 4 },
   statsRow: { flexDirection: "row", gap: 10 },
   statCard: {
     flex: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 16,
     alignItems: "center",
     gap: 4,
   },
-  statNum: { fontSize: 28, fontWeight: "800" },
+  statNum: { fontSize: 28, fontWeight: "800", letterSpacing: -1 },
   statLabel: { fontSize: 11, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },
   sectionLabel: {
     fontSize: 11,
     fontWeight: "700",
-    letterSpacing: 1,
-    marginTop: 8,
+    letterSpacing: 1.2,
+    marginTop: 6,
   },
   showRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    padding: 12,
-    borderRadius: 14,
+    padding: 14,
+    borderRadius: 16,
     borderWidth: 1,
   },
   showInfo: { flex: 1, gap: 2 },
-  showTitle: { fontSize: 15, fontWeight: "600" },
+  showTitle: { fontSize: 15, fontWeight: "600", letterSpacing: -0.2 },
   showAuthor: { fontSize: 12 },
   showEpisodes: { fontSize: 11 },
   queueRow: {
@@ -129,11 +147,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
   },
   queueDot: { width: 10, height: 10, borderRadius: 5 },
   queueInfo: { flex: 1, gap: 2 },
-  queueName: { fontSize: 15, fontWeight: "600" },
+  queueName: { fontSize: 15, fontWeight: "600", letterSpacing: -0.2 },
   queueCount: { fontSize: 12 },
 });

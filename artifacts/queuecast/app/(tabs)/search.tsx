@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
 import {
   Platform,
@@ -18,6 +19,7 @@ import { AddToQueueSheet } from "@/components/AddToQueueSheet";
 import { EpisodeRow } from "@/components/EpisodeRow";
 import { PodcastCard } from "@/components/PodcastCard";
 
+const isIOS = Platform.OS === "ios";
 const CATEGORIES = ["Technology", "True Crime", "Science", "News", "Business", "History", "Comedy"];
 
 export default function SearchScreen() {
@@ -64,8 +66,17 @@ export default function SearchScreen() {
     >
       <Text style={[styles.title, { color: colors.foreground }]}>Search</Text>
 
-      <View style={[styles.searchBar, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
-        <Ionicons name="search" size={18} color={colors.mutedForeground} />
+      <View
+        style={[
+          styles.searchBar,
+          { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+        ]}
+      >
+        {isIOS ? (
+          <SymbolView name="magnifyingglass" size={18} tintColor={colors.mutedForeground} />
+        ) : (
+          <Ionicons name="search" size={18} color={colors.mutedForeground} />
+        )}
         <TextInput
           value={query}
           onChangeText={setQuery}
@@ -78,7 +89,11 @@ export default function SearchScreen() {
         />
         {query.length > 0 && (
           <Pressable onPress={() => setQuery("")} hitSlop={8}>
-            <Ionicons name="close-circle" size={18} color={colors.mutedForeground} />
+            {isIOS ? (
+              <SymbolView name="xmark.circle.fill" size={18} tintColor={colors.mutedForeground} />
+            ) : (
+              <Ionicons name="close-circle" size={18} color={colors.mutedForeground} />
+            )}
           </Pressable>
         )}
       </View>
@@ -95,7 +110,11 @@ export default function SearchScreen() {
                   key={cat}
                   style={({ pressed }) => [
                     styles.categoryCard,
-                    { backgroundColor: mainColor + "30", borderColor: mainColor + "60", opacity: pressed ? 0.7 : 1 },
+                    {
+                      backgroundColor: mainColor + "20",
+                      borderColor: mainColor + "45",
+                      opacity: pressed ? 0.7 : 1,
+                    },
                   ]}
                 >
                   <Text style={[styles.categoryText, { color: mainColor }]}>{cat}</Text>
@@ -108,7 +127,11 @@ export default function SearchScreen() {
           </View>
 
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 8 }]}>ALL SHOWS</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hList}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.hList}
+          >
             {Object.values(PODCASTS).map((p) => (
               <PodcastCard key={p.id} podcast={p} size="md" />
             ))}
@@ -119,7 +142,11 @@ export default function SearchScreen() {
           {matchingPodcasts.length > 0 && (
             <>
               <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>SHOWS</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hList}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.hList}
+              >
                 {matchingPodcasts.map((p) => (
                   <PodcastCard key={p.id} podcast={p} size="md" />
                 ))}
@@ -143,7 +170,11 @@ export default function SearchScreen() {
 
           {matchingPodcasts.length === 0 && matchingEpisodes.length === 0 && (
             <View style={styles.noResults}>
-              <Ionicons name="search" size={40} color={colors.mutedForeground} />
+              {isIOS ? (
+                <SymbolView name="magnifyingglass" size={40} tintColor={colors.mutedForeground} />
+              ) : (
+                <Ionicons name="search" size={40} color={colors.mutedForeground} />
+              )}
               <Text style={[styles.noResultsText, { color: colors.mutedForeground }]}>
                 No results for "{query}"
               </Text>
@@ -164,17 +195,22 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { paddingHorizontal: 16, gap: 12 },
-  title: { fontSize: 32, fontWeight: "800", letterSpacing: -1, marginBottom: 4 },
+  title: { fontSize: 34, fontWeight: "800", letterSpacing: -1.5, marginBottom: 4 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    padding: 12,
-    borderRadius: 14,
+    padding: 13,
+    borderRadius: 16,
     borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: 16 },
-  sectionLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 1, marginTop: 8 },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginTop: 6,
+  },
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -183,13 +219,13 @@ const styles = StyleSheet.create({
   categoryCard: {
     width: "47%",
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     gap: 4,
   },
-  categoryText: { fontSize: 15, fontWeight: "700" },
+  categoryText: { fontSize: 15, fontWeight: "700", letterSpacing: -0.2 },
   categoryCount: { fontSize: 12 },
-  hList: { gap: 16, paddingVertical: 4 },
+  hList: { gap: 16, paddingVertical: 4, paddingRight: 8 },
   noResults: { alignItems: "center", gap: 12, paddingVertical: 48 },
   noResultsText: { fontSize: 16, textAlign: "center" },
 });

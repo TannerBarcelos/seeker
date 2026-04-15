@@ -17,9 +17,9 @@ export function PodcastCard({ podcast, onPress, size = "md" }: Props) {
   return (
     <Pressable
       onPress={() => onPress?.(podcast)}
-      style={({ pressed }) => [styles.container, { opacity: pressed ? 0.75 : 1 }]}
+      style={({ pressed }) => [styles.container, { opacity: pressed ? 0.72 : 1 }]}
     >
-      <PodcastArtwork colors={podcast.artworkColors} size={dim} borderRadius={12} />
+      <PodcastArtwork colors={podcast.artworkColors} size={dim} borderRadius={16} />
       <View style={{ maxWidth: dim }}>
         <Text style={[styles.title, { color: colors.foreground }]} numberOfLines={2}>
           {podcast.title}
@@ -27,7 +27,7 @@ export function PodcastCard({ podcast, onPress, size = "md" }: Props) {
         <Text style={[styles.author, { color: colors.mutedForeground }]} numberOfLines={1}>
           {podcast.author}
         </Text>
-        <View style={[styles.badge, { backgroundColor: colors.secondary }]}>
+        <View style={[styles.badge, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}>
           <Text style={[styles.category, { color: colors.mutedForeground }]}>{podcast.category}</Text>
         </View>
       </View>
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     marginTop: 4,
+    letterSpacing: -0.2,
   },
   author: {
     fontSize: 11,
@@ -51,10 +52,11 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignSelf: "flex-start",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
     marginTop: 4,
+    borderWidth: 1,
   },
   category: {
     fontSize: 10,

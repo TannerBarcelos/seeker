@@ -1,13 +1,17 @@
 import * as Haptics from "expo-haptics";
+import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import { SymbolView } from "expo-symbols";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useColors } from "@/hooks/useColors";
 import { usePlayer } from "@/context/PlayerContext";
 import { useQueues } from "@/context/QueuesContext";
 import { PodcastArtwork } from "./PodcastArtwork";
+
+const isIOS = Platform.OS === "ios";
 
 export function MiniPlayer() {
   const colors = useColors();
@@ -30,18 +34,19 @@ export function MiniPlayer() {
     else resume();
   }
 
-  return (
-    <Animated.View
-      entering={FadeInDown}
-      exiting={FadeOutDown}
-      style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}
-    >
-      <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` as any, backgroundColor: queueColor }]} />
+  const Inner = (
+    <View style={styles.inner}>
+      <View style={[styles.progressBar]}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${progress * 100}%` as any, backgroundColor: queueColor },
+          ]}
+        />
       </View>
 
-      <Pressable onPress={handlePress} style={styles.inner}>
-        <PodcastArtwork colors={currentEpisode.artworkColors} size={44} borderRadius={8} />
+      <Pressable onPress={handlePress} style={styles.content}>
+        <PodcastArtwork colors={currentEpisode.artworkColors} size={44} borderRadius={10} />
 
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.foreground }]} numberOfLines={1}>
@@ -56,41 +61,83 @@ export function MiniPlayer() {
         </View>
 
         <View style={styles.controls}>
-          <Pressable onPress={handlePlayPause} hitSlop={8} style={styles.playBtn}>
-            <Ionicons
-              name={isPlaying ? "pause.fill" as any : "play.fill" as any}
-              size={22}
-              color={colors.foreground}
-            />
+          <Pressable onPress={handlePlayPause} hitSlop={10} style={styles.controlBtn}>
+            {isIOS ? (
+              <SymbolView
+                name={isPlaying ? "pause.fill" : "play.fill"}
+                size={22}
+                tintColor={colors.foreground}
+              />
+            ) : (
+              <Ionicons
+                name={isPlaying ? "pause" : "play"}
+                size={22}
+                color={colors.foreground}
+              />
+            )}
           </Pressable>
-          <Pressable onPress={stop} hitSlop={8} style={styles.closeBtn}>
-            <Ionicons name="close" size={20} color={colors.mutedForeground} />
+          <Pressable onPress={stop} hitSlop={10} style={styles.controlBtn}>
+            {isIOS ? (
+              <SymbolView name="xmark" size={17} tintColor={colors.mutedForeground} />
+            ) : (
+              <Ionicons name="close" size={18} color={colors.mutedForeground} />
+            )}
           </Pressable>
         </View>
       </Pressable>
+    </View>
+  );
+
+  return (
+    <Animated.View
+      entering={FadeInDown.springify().damping(18)}
+      exiting={FadeOutDown.springify().damping(18)}
+      style={styles.container}
+    >
+      {isIOS ? (
+        <BlurView intensity={72} tint="dark" style={[StyleSheet.absoluteFill, { borderRadius: 20 }]} />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(20,20,28,0.92)", borderRadius: 20 }]} />
+      )}
+      <View style={[styles.glassBorder, StyleSheet.absoluteFill]} />
+      {Inner}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 12,
-    marginBottom: 8,
-    borderRadius: 16,
+    marginHorizontal: 14,
+    marginBottom: 10,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  glassBorder: {
+    borderRadius: 20,
     borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.14)",
+  },
+  inner: {
     overflow: "hidden",
   },
   progressBar: {
     height: 2,
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   progressFill: {
     height: 2,
   },
-  inner: {
+  content: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    padding: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   info: {
     flex: 1,
@@ -99,6 +146,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: "600",
+    letterSpacing: -0.2,
   },
   meta: {
     flexDirection: "row",
@@ -117,12 +165,9 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 2,
   },
-  playBtn: {
-    padding: 6,
-  },
-  closeBtn: {
-    padding: 6,
+  controlBtn: {
+    padding: 7,
   },
 });
