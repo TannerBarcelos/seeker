@@ -11,8 +11,16 @@ mean, not just what you typed.
   ("true crime shows that focus on the detectives' side of the case"), not
   just by matching keywords in a title.
 
-See [`docs/vision.md`](docs/vision.md) for the full product vision, problem
-statement, and MVP scope.
+**North Star:** Seeker exists so that a person's listening life can hold more
+than one interest at a time — without any of them getting lost.
+
+## Product docs
+
+- [`docs/vision.md`](docs/vision.md) — the problem statement and MVP scope.
+- [`docs/prfaq.md`](docs/prfaq.md) — the working-backwards artifact: launch
+  press release, customer FAQ, and the internal FAQ that stress-tests it.
+- [`docs/prd.md`](docs/prd.md) — requirements, product invariants, acceptance
+  criteria, milestones, and open technical decisions.
 
 ## Getting started
 
